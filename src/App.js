@@ -95,118 +95,133 @@ let options = {
   }
 };
 
-function App() {
+let nodesArr = []
 
-  let data = initialGraph;
+let edgesArr = []
 
-  console.log(data)
+let data = initialGraph;
 
-  let nodesArr = []
-
-  let edgesArr = []
-
-  Object.keys(data).forEach( key => {
-    if (nodesArr.filter( n => n.id === key).length > 0 ) {
-      return;
-    }
-    nodesArr.push({
-      id: key,
-      label: key,
-      title: data[key].name,
-      department: data[key].department,
-      color: 'blue',
-    })
-    if ("prereqs" in data[key]) {
-      if ("AND" in data[key].prereqs) {
-        if (nodesArr.filter( n => n.id === key + "_AND").length > 0 ) {
-          return;
-        }
-        nodesArr.push({
-          id: key + "_AND",
-          label: 'PREREQ OF',
-          title: key + "_AND",
-          department: data[key].department,
-          color: 'blue',
-        })
-        edgesArr.push({
-          from: key + "_AND",
-          to: key,
-          color: '#D3D3D3',
-          department: data[key].department,
-        })
-        data[key].prereqs.AND.forEach( courseId => {
-          if (typeof courseId === 'string') {
-            edgesArr.push({
-              from: courseId,
-              to: key + "_AND",
-              color: '#D3D3D3',
-              department: data[key].department,
-            })
-          }
-          if (typeof courseId === 'object' && 'OR' in courseId && courseId.OR.length > 0) {
-            if (nodesArr.filter( n => n.id === key + "_OR").length > 0 ) {
-              return;
-            }
-            nodesArr.push({
-              id: key + "_OR",
-              label: 'TAKE EITHER',
-              title: key + "_OR",
-              department: data[key].department,
-              color: 'blue',
-            })
-            edgesArr.push({
-              from: key + "_OR",
-              to: key + "_AND",
-              color: '#D3D3D3',
-              department: data[key].department,
-            })
-            courseId.OR.forEach( orCourseId => {
-              edgesArr.push({
-                from: courseId,
-                to: key + "_OR",
-                color: '#D3D3D3',
-                department: data[key].department,
-              })
-            })
-          }
-        })
+Object.keys(data).forEach( key => {
+  if (nodesArr.filter( n => n.id === key).length > 0 ) {
+    return;
+  }
+  nodesArr.push({
+    id: key,
+    label: key,
+    title: data[key].name,
+    department: data[key].department,
+    color: 'blue',
+  })
+  if ("prereqs" in data[key]) {
+    if ("AND" in data[key].prereqs) {
+      if (nodesArr.filter( n => n.id === key + "_AND").length > 0 ) {
+        return;
       }
-      if ("OR" in data[key].prereqs) {
-        if (nodesArr.filter( n => n.id === key + "_OR").length > 0 ) {
-          return;
+      nodesArr.push({
+        id: key + "_AND",
+        label: 'PREREQ OF',
+        title: key + "_AND",
+        department: data[key].department,
+        color: 'blue',
+      })
+      edgesArr.push({
+        from: key + "_AND",
+        to: key,
+        color: '#D3D3D3',
+        department: data[key].department,
+      })
+      data[key].prereqs.AND.forEach( courseId => {
+        if (typeof courseId === 'string') {
+          edgesArr.push({
+            from: courseId,
+            to: key + "_AND",
+            color: '#D3D3D3',
+            department: data[key].department,
+          })
         }
-        nodesArr.push({
-          id: key + "_OR",
-          label: 'TAKE EITHER',
-          title: key + "_OR",
-          department: data[key].department,
-          color: 'blue',
-        })
-        edgesArr.push({
-          from: key + "_OR",
-          to: key,
-          color: '#D3D3D3',
-          department: data[key].department,
-        })
-        data[key].prereqs.OR.forEach( courseId => {
-          if (typeof courseId === 'string') {
+        if (typeof courseId === 'object' && 'OR' in courseId && courseId.OR.length > 0) {
+          if (nodesArr.filter( n => n.id === key + "_OR").length > 0 ) {
+            return;
+          }
+          nodesArr.push({
+            id: key + "_OR",
+            label: 'TAKE EITHER',
+            title: key + "_OR",
+            department: data[key].department,
+            color: 'blue',
+          })
+          edgesArr.push({
+            from: key + "_OR",
+            to: key + "_AND",
+            color: '#D3D3D3',
+            department: data[key].department,
+          })
+          courseId.OR.forEach( orCourseId => {
             edgesArr.push({
               from: courseId,
               to: key + "_OR",
               color: '#D3D3D3',
               department: data[key].department,
             })
-          }
-        })
-      }
+          })
+        }
+      })
     }
-  })
+    if ("OR" in data[key].prereqs) {
+      if (nodesArr.filter( n => n.id === key + "_OR").length > 0 ) {
+        return;
+      }
+      nodesArr.push({
+        id: key + "_OR",
+        label: 'TAKE EITHER',
+        title: key + "_OR",
+        department: data[key].department,
+        color: 'blue',
+      })
+      edgesArr.push({
+        from: key + "_OR",
+        to: key,
+        color: '#D3D3D3',
+        department: data[key].department,
+      })
+      data[key].prereqs.OR.forEach( courseId => {
+        if (typeof courseId === 'string') {
+          edgesArr.push({
+            from: courseId,
+            to: key + "_OR",
+            color: '#D3D3D3',
+            department: data[key].department,
+          })
+        }
+      })
+    }
+  }
+})
 
-  let departments = nodesArr.map(node => {
-    return node.department
-  })
+let departments = nodesArr.map(node => {
+  return node.department
+})
 
-  departments = [...new Set(departments)]
+departments = [...new Set(departments)]
+
+
+let department_colors = {}
+
+departments.map(department => {
+  var randomColor = '#' +  Math.floor(Math.random()*16777215).toString(16);
+  department_colors[department] = randomColor;
+})
+
+nodesArr.forEach(node => {
+  node.color = department_colors[node.department]
+})
+
+function App() {
+
+
+  useEffect(() => {
+
+  },[])
 
 
   const filteredTerms = ['CIS']
@@ -313,7 +328,7 @@ function App() {
     let cloneNodes = allNodes.map(a => {return {...a}});
 
     cloneNodes.forEach( node => {
-      node.color = 'blue';
+      node.color = department_colors[node.department]
     })
 
     let newGraph = {
